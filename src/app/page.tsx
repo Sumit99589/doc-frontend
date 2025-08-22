@@ -5,7 +5,7 @@ import Dashboard from "@/components/Dashboard";
 export default function Home(){
 	return(
 		<div>
-			<Dashboard></Dashboard>
+			"This is the Home page which comes before log in "
 		</div>
 	)
 }
