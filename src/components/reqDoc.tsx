@@ -194,12 +194,13 @@ export default function RequestDocumentsDialog({clientName}) {
 
   async function handleSubmit() {
     setIsSubmitting(true);
+
     const payload = {
       categoryId: selectedCategory?.id || null,
       clientName: clientName,
       period,
       dueDate,
-      docs: [...selectedDocs, ...customDocs],
+      docs: [...selectedDocs, ...customDocs]
     };
 
     try {

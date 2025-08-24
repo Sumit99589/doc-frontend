@@ -261,52 +261,52 @@ const DocumentUploadPage = () => {
   const getStatusIcon = (status) => {
     switch (status) {
       case 'uploading':
-        return <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>;
+        return <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>;
       case 'completed':
-        return <CheckCircle className="h-4 w-4 text-green-500" />;
+        return <CheckCircle className="h-4 w-4 text-green-600" />;
       case 'failed':
-        return <AlertCircle className="h-4 w-4 text-red-500" />;
+        return <AlertCircle className="h-4 w-4 text-red-600" />;
       default:
-        return <Clock className="h-4 w-4 text-gray-400" />;
+        return <Clock className="h-4 w-4 text-gray-500" />;
     }
   };
 
   // Get file type icon
   const getFileTypeIcon = (fileName) => {
     const extension = fileName.split('.').pop().toLowerCase();
-    const iconClass = "h-5 w-5";
+    const iconClass = "h-4 w-4";
     
     switch (extension) {
       case 'pdf':
         return <FileText className={`${iconClass} text-red-500`} />;
       case 'doc':
       case 'docx':
-        return <FileText className={`${iconClass} text-blue-500`} />;
+        return <FileText className={`${iconClass} text-blue-600`} />;
       case 'xls':
       case 'xlsx':
-        return <FileText className={`${iconClass} text-green-500`} />;
+        return <FileText className={`${iconClass} text-green-600`} />;
       case 'jpg':
       case 'jpeg':
       case 'png':
       case 'gif':
-        return <Eye className={`${iconClass} text-purple-500`} />;
+        return <Eye className={`${iconClass} text-purple-600`} />;
       default:
-        return <FileText className={`${iconClass} text-gray-500`} />;
+        return <FileText className={`${iconClass} text-gray-600`} />;
     }
   };
 
   // Loading state
   if (isValidatingToken) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center p-4">
-        <div className="bg-white p-8 rounded-3xl shadow-2xl text-center max-w-md w-full border border-slate-200">
-          <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-500 border-t-transparent mx-auto mb-6"></div>
-          <h2 className="text-2xl font-bold text-slate-800 mb-3">Validating Access</h2>
-          <p className="text-slate-600">Verifying your upload permissions...</p>
-          <div className="mt-6 bg-blue-50 border border-blue-200 rounded-xl p-4">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="bg-white p-6 rounded-lg shadow-lg text-center max-w-md w-full border">
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-600 border-t-transparent mx-auto mb-4"></div>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Validating Access</h2>
+          <p className="text-gray-600 text-sm">Verifying your upload permissions...</p>
+          <div className="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
             <div className="flex items-center justify-center space-x-2 text-blue-700">
               <Shield className="h-4 w-4" />
-              <span className="text-sm font-medium">Secure Connection Verified</span>
+              <span className="text-sm font-medium">Secure Connection</span>
             </div>
           </div>
         </div>
@@ -317,31 +317,31 @@ const DocumentUploadPage = () => {
   // Error state
   if (tokenError) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-red-50 via-pink-50 to-rose-100 flex items-center justify-center p-4">
-        <div className="bg-white p-8 rounded-3xl shadow-2xl text-center max-w-lg w-full border border-red-200">
-          <div className="bg-red-100 p-4 rounded-full w-fit mx-auto mb-6">
-            <AlertCircle className="h-12 w-12 text-red-600" />
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="bg-white p-6 rounded-lg shadow-lg text-center max-w-lg w-full border border-red-200">
+          <div className="bg-red-100 p-3 rounded-full w-fit mx-auto mb-4">
+            <AlertCircle className="h-8 w-8 text-red-600" />
           </div>
-          <h2 className="text-3xl font-bold text-slate-800 mb-4">Access Denied</h2>
-          <p className="text-slate-600 mb-6 leading-relaxed">{tokenError}</p>
-          <div className="bg-red-50 border border-red-200 rounded-2xl p-6">
-            <h3 className="font-semibold text-red-800 mb-3">Common Reasons:</h3>
-            <ul className="text-sm text-red-700 space-y-2 text-left">
+          <h2 className="text-xl font-semibold text-gray-900 mb-3">Access Denied</h2>
+          <p className="text-gray-600 mb-4 text-sm">{tokenError}</p>
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+            <h3 className="font-medium text-red-800 mb-2 text-sm">Common Issues:</h3>
+            <ul className="text-xs text-red-700 space-y-1 text-left">
               <li className="flex items-start space-x-2">
-                <X className="h-4 w-4 mt-0.5 text-red-500" />
+                <X className="h-3 w-3 mt-0.5 text-red-500 flex-shrink-0" />
                 <span>Upload link has expired</span>
               </li>
               <li className="flex items-start space-x-2">
-                <X className="h-4 w-4 mt-0.5 text-red-500" />
+                <X className="h-3 w-3 mt-0.5 text-red-500 flex-shrink-0" />
                 <span>Link has already been used</span>
               </li>
               <li className="flex items-start space-x-2">
-                <X className="h-4 w-4 mt-0.5 text-red-500" />
+                <X className="h-3 w-3 mt-0.5 text-red-500 flex-shrink-0" />
                 <span>Invalid or corrupted link</span>
               </li>
             </ul>
           </div>
-          <p className="text-sm text-slate-500 mt-6">
+          <p className="text-xs text-gray-500 mt-4">
             Please contact your accountant for a new upload link.
           </p>
         </div>
@@ -352,13 +352,13 @@ const DocumentUploadPage = () => {
   // No token data
   if (!tokenData) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
-        <div className="bg-white p-8 rounded-3xl shadow-2xl text-center max-w-md w-full">
-          <div className="bg-slate-100 p-4 rounded-full w-fit mx-auto mb-6">
-            <Upload className="h-12 w-12 text-slate-600" />
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="bg-white p-6 rounded-lg shadow-lg text-center max-w-md w-full">
+          <div className="bg-gray-100 p-3 rounded-full w-fit mx-auto mb-4">
+            <Upload className="h-8 w-8 text-gray-600" />
           </div>
-          <h2 className="text-2xl font-bold text-slate-800 mb-3">No Upload Link Found</h2>
-          <p className="text-slate-600">Please use a valid upload link to access this page.</p>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">No Upload Link Found</h2>
+          <p className="text-gray-600 text-sm">Please use a valid upload link to access this page.</p>
         </div>
       </div>
     );
@@ -371,33 +371,33 @@ const DocumentUploadPage = () => {
   // Success state
   if (uploadComplete && totalUploadedFiles > 0) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-100 flex items-center justify-center p-4">
-        <div className="bg-white p-8 rounded-3xl shadow-2xl text-center max-w-lg w-full border border-green-200">
-          <div className="bg-green-100 p-4 rounded-full w-fit mx-auto mb-6">
-            <CheckCircle className="h-16 w-16 text-green-600" />
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="bg-white p-6 rounded-lg shadow-lg text-center max-w-lg w-full border border-green-200">
+          <div className="bg-green-100 p-3 rounded-full w-fit mx-auto mb-4">
+            <CheckCircle className="h-12 w-12 text-green-600" />
           </div>
-          <h2 className="text-3xl font-bold text-slate-800 mb-4">Upload Successful!</h2>
-          <p className="text-slate-600 mb-6">
+          <h2 className="text-xl font-semibold text-gray-900 mb-3">Upload Successful</h2>
+          <p className="text-gray-600 mb-4 text-sm">
             {totalUploadedFiles} file{totalUploadedFiles !== 1 ? 's' : ''} uploaded successfully for <strong>{tokenData.clientName}</strong>
           </p>
-          <div className="bg-green-50 border border-green-200 rounded-2xl p-6 mb-6">
-            <h3 className="font-semibold text-green-800 mb-3">What happens next?</h3>
-            <ul className="text-sm text-green-700 space-y-2 text-left">
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+            <h3 className="font-medium text-green-800 mb-2 text-sm">What happens next?</h3>
+            <ul className="text-xs text-green-700 space-y-1 text-left">
               <li className="flex items-start space-x-2">
-                <CheckCircle className="h-4 w-4 mt-0.5 text-green-500" />
+                <CheckCircle className="h-3 w-3 mt-0.5 text-green-500 flex-shrink-0" />
                 <span>Your documents are securely stored</span>
               </li>
               <li className="flex items-start space-x-2">
-                <CheckCircle className="h-4 w-4 mt-0.5 text-green-500" />
+                <CheckCircle className="h-3 w-3 mt-0.5 text-green-500 flex-shrink-0" />
                 <span>Your accountant will be notified</span>
               </li>
               <li className="flex items-start space-x-2">
-                <CheckCircle className="h-4 w-4 mt-0.5 text-green-500" />
+                <CheckCircle className="h-3 w-3 mt-0.5 text-green-500 flex-shrink-0" />
                 <span>Processing will begin shortly</span>
               </li>
             </ul>
           </div>
-          <p className="text-sm text-slate-500">
+          <p className="text-xs text-gray-500">
             You can safely close this page. Your upload is complete.
           </p>
         </div>
@@ -406,94 +406,90 @@ const DocumentUploadPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-white border-b border-slate-200 sticky top-0 z-40 backdrop-blur-sm bg-white/95">
-        <div className="container mx-auto px-4 py-6">
+      <div className="bg-white border-b border-gray-200 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="bg-gradient-to-br from-blue-500 to-indigo-600 p-3 rounded-2xl shadow-lg">
-                <Upload className="h-6 w-6 text-white" />
+            <div className="flex items-center space-x-3">
+              <div className="bg-blue-600 p-2 rounded-lg">
+                <Upload className="h-5 w-5 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-slate-800">Secure Document Upload</h1>
-                <p className="text-slate-600">Upload your documents safely and securely</p>
+                <h1 className="text-xl font-semibold text-gray-900">Document Upload Portal</h1>
+                <p className="text-sm text-gray-600">Secure file transfer system</p>
               </div>
             </div>
-            <div className="hidden md:flex items-center space-x-4">
-              <div className="flex items-center space-x-2 bg-green-50 border border-green-200 px-3 py-2 rounded-xl">
-                <Shield className="h-4 w-4 text-green-600" />
-                <span className="text-sm font-medium text-green-700">SSL Secured</span>
-              </div>
+            <div className="flex items-center space-x-2 bg-green-50 border border-green-200 px-3 py-1 rounded-lg">
+              <Shield className="h-4 w-4 text-green-600" />
+              <span className="text-sm font-medium text-green-700">SSL Secured</span>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-8">
-        {/* Client Info Card */}
-        <div className="bg-white rounded-3xl shadow-xl p-8 mb-8 border border-slate-200">
-          <div className="grid md:grid-cols-3 gap-6">
-            <div className="flex items-center space-x-4 bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-2xl border border-blue-100">
-              <div className="bg-blue-100 p-3 rounded-xl">
-                <User className="h-6 w-6 text-blue-600" />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        {/* Client Info */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+          <div className="p-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="flex items-center space-x-3">
+                <div className="bg-blue-100 p-2 rounded-lg">
+                  <User className="h-4 w-4 text-blue-600" />
+                </div>
+                <div>
+                  <p className="text-xs font-medium text-blue-600 uppercase tracking-wide">Client</p>
+                  <p className="text-sm font-semibold text-gray-900">{tokenData.clientName}</p>
+                </div>
               </div>
-              <div>
-                <p className="text-sm text-blue-600 font-semibold uppercase tracking-wide">Client</p>
-                <p className="text-xl font-bold text-slate-800">{tokenData.clientName}</p>
+              
+              <div className="flex items-center space-x-3">
+                <div className="bg-green-100 p-2 rounded-lg">
+                  <Clock className="h-4 w-4 text-green-600" />
+                </div>
+                <div>
+                  <p className="text-xs font-medium text-green-600 uppercase tracking-wide">Expires</p>
+                  <p className="text-sm font-semibold text-gray-900">
+                    {isExpired ? 'Expired' : expiresAt.toLocaleDateString()}
+                  </p>
+                </div>
               </div>
-            </div>
-            
-            <div className="flex items-center space-x-4 bg-gradient-to-r from-emerald-50 to-green-50 p-6 rounded-2xl border border-emerald-100">
-              <div className="bg-emerald-100 p-3 rounded-xl">
-                <Clock className="h-6 w-6 text-emerald-600" />
-              </div>
-              <div>
-                <p className="text-sm text-emerald-600 font-semibold uppercase tracking-wide">Expires</p>
-                <p className="text-lg font-bold text-slate-800">
-                  {isExpired ? 'Expired' : expiresAt.toLocaleDateString()}
-                </p>
-              </div>
-            </div>
 
-            <div className="flex items-center space-x-4 bg-gradient-to-r from-purple-50 to-pink-50 p-6 rounded-2xl border border-purple-100">
-              <div className="bg-purple-100 p-3 rounded-xl">
-                <FolderOpen className="h-6 w-6 text-purple-600" />
-              </div>
-              <div>
-                <p className="text-sm text-purple-600 font-semibold uppercase tracking-wide">Sections</p>
-                <p className="text-lg font-bold text-slate-800">{tokenData.sections.length} Available</p>
+              <div className="flex items-center space-x-3">
+                <div className="bg-purple-100 p-2 rounded-lg">
+                  <FolderOpen className="h-4 w-4 text-purple-600" />
+                </div>
+                <div>
+                  <p className="text-xs font-medium text-purple-600 uppercase tracking-wide">Sections</p>
+                  <p className="text-sm font-semibold text-gray-900">{tokenData.sections.length} Available</p>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
         {/* Upload Sections */}
-        <div className="space-y-8">
+        <div className="space-y-4">
           {tokenData.sections.map((section, index) => (
-            <div key={section} className="bg-white rounded-3xl shadow-xl overflow-hidden border border-slate-200">
-              <div className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 p-6">
+            <div key={section} className="bg-white rounded-lg shadow-sm border border-gray-200">
+              <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <div className="bg-white/20 backdrop-blur-sm p-2 rounded-xl">
-                      <FolderOpen className="h-6 w-6 text-white" />
-                    </div>
-                    <div>
-                      <h2 className="text-xl font-bold text-white capitalize">
-                        {section.replace(/_/g, ' ')} Documents
-                      </h2>
-                      <p className="text-white/80 text-sm">
-                        {files[section]?.length || 0} file{files[section]?.length !== 1 ? 's' : ''} selected
-                      </p>
-                    </div>
+                  <div className="flex items-center space-x-2">
+                    <FolderOpen className="h-4 w-4 text-gray-600" />
+                    <h3 className="text-sm font-semibold text-gray-900 capitalize">
+                      {section.replace(/_/g, ' ')}
+                    </h3>
+                    <span className="text-xs text-gray-500">
+                      ({files[section]?.length || 0} files)
+                    </span>
                   </div>
                 </div>
               </div>
 
-              <div className="p-8">
+              <div className="p-4">
                 {/* File Upload Area */}
                 <div
-                  className="relative border-2 border-dashed border-slate-300 rounded-2xl p-12 text-center hover:border-indigo-400 transition-all duration-300 cursor-pointer bg-gradient-to-br from-slate-50 to-blue-50 hover:from-indigo-50 hover:to-blue-50 group"
+                  className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors cursor-pointer bg-gray-50 hover:bg-blue-50"
                   onClick={() => fileInputRefs.current[section]?.click()}
                   onDragOver={(e) => e.preventDefault()}
                   onDrop={(e) => {
@@ -502,14 +498,12 @@ const DocumentUploadPage = () => {
                     handleFileSelect(section, droppedFiles);
                   }}
                 >
-                  <div className="group-hover:scale-110 transition-transform duration-300">
-                    <Upload className="h-16 w-16 text-slate-400 mx-auto mb-6 group-hover:text-indigo-500 transition-colors" />
-                  </div>
-                  <h3 className="text-2xl font-bold text-slate-800 mb-3">
+                  <Upload className="h-8 w-8 text-gray-400 mx-auto mb-3" />
+                  <p className="text-sm font-medium text-gray-700 mb-1">
                     Drop files here or click to browse
-                  </h3>
-                  <p className="text-slate-600 mb-6 max-w-md mx-auto">
-                    Supported formats: PDF, Word, Excel, Images (Max 50MB per file)
+                  </p>
+                  <p className="text-xs text-gray-500 mb-3">
+                    PDF, Word, Excel, Images • Max 50MB per file
                   </p>
                   <input
                     ref={el => fileInputRefs.current[section] = el}
@@ -519,44 +513,44 @@ const DocumentUploadPage = () => {
                     accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.gif,.txt,.csv"
                     onChange={(e) => handleFileSelect(section, e.target.files)}
                   />
-                  <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-8 py-3 rounded-xl font-semibold hover:from-indigo-600 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
-                    <Zap className="h-5 w-5" />
-                    <span>Choose Files</span>
+                  <div className="inline-flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">
+                    <Zap className="h-4 w-4" />
+                    <span>Select Files</span>
                   </div>
                 </div>
 
                 {/* Selected Files */}
                 {files[section] && files[section].length > 0 && (
-                  <div className="mt-8">
-                    <div className="flex items-center justify-between mb-6">
-                      <h4 className="text-lg font-bold text-slate-800">
+                  <div className="mt-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <h4 className="text-sm font-medium text-gray-900">
                         Selected Files ({files[section].length})
                       </h4>
-                      <div className="text-sm text-slate-500">
-                        Total size: {formatFileSize(files[section].reduce((acc, file) => acc + file.size, 0))}
+                      <div className="text-xs text-gray-500">
+                        {formatFileSize(files[section].reduce((acc, file) => acc + file.size, 0))}
                       </div>
                     </div>
-                    <div className="space-y-3 max-h-80 overflow-y-auto pr-2 custom-scrollbar">
+                    <div className="space-y-2 max-h-60 overflow-y-auto">
                       {files[section].map((file, fileIndex) => {
                         const fileId = `${file.name}_${file.size}_${file.lastModified}`;
                         const status = uploadStatus[section]?.[fileId] || 'pending';
                         
                         return (
-                          <div key={fileIndex} className="flex items-center justify-between bg-slate-50 hover:bg-slate-100 transition-colors p-4 rounded-xl border border-slate-200">
-                            <div className="flex items-center space-x-4 flex-1 min-w-0">
+                          <div key={fileIndex} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg border border-gray-100">
+                            <div className="flex items-center space-x-3 flex-1 min-w-0">
                               {getFileTypeIcon(file.name)}
                               <div className="min-w-0 flex-1">
-                                <p className="font-semibold text-slate-800 truncate">{file.name}</p>
-                                <div className="flex items-center space-x-4 mt-1">
-                                  <span className="text-sm text-slate-500">{formatFileSize(file.size)}</span>
-                                  <span className="text-xs bg-slate-200 px-2 py-1 rounded-full text-slate-600">
-                                    {file.type.split('/')[1].toUpperCase()}
+                                <p className="text-sm font-medium text-gray-900 truncate">{file.name}</p>
+                                <div className="flex items-center space-x-3 mt-1">
+                                  <span className="text-xs text-gray-500">{formatFileSize(file.size)}</span>
+                                  <span className="text-xs bg-gray-200 px-2 py-0.5 rounded text-gray-600">
+                                    {file.type.split('/')[1]?.toUpperCase() || 'FILE'}
                                   </span>
                                 </div>
                               </div>
                             </div>
                             
-                            <div className="flex items-center space-x-3">
+                            <div className="flex items-center space-x-2">
                               {getStatusIcon(status)}
                               {status === 'pending' && (
                                 <button
@@ -564,10 +558,10 @@ const DocumentUploadPage = () => {
                                     e.stopPropagation();
                                     removeFile(section, fileIndex);
                                   }}
-                                  className="p-2 hover:bg-red-100 rounded-lg transition-colors group"
+                                  className="p-1 hover:bg-red-100 rounded transition-colors"
                                   title="Remove file"
                                 >
-                                  <Trash2 className="h-4 w-4 text-slate-400 group-hover:text-red-500" />
+                                  <Trash2 className="h-3 w-3 text-gray-400 hover:text-red-500" />
                                 </button>
                               )}
                             </div>
@@ -584,37 +578,38 @@ const DocumentUploadPage = () => {
 
         {/* Upload Button */}
         {Object.values(files).some(sectionFiles => sectionFiles.length > 0) && (
-          <div className="mt-12 text-center">
-            <div className="bg-white rounded-3xl shadow-xl p-8 border border-slate-200">
-              <div className="mb-6">
-                <h3 className="text-xl font-bold text-slate-800 mb-2">Ready to Upload</h3>
-                <p className="text-slate-600">
-                  {Object.values(files).reduce((acc, sectionFiles) => acc + sectionFiles.length, 0)} files selected across {Object.values(files).filter(sectionFiles => sectionFiles.length > 0).length} sections
-                </p>
+          <div className="mt-6">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-900">Ready to Upload</h3>
+                  <p className="text-xs text-gray-600 mt-1">
+                    {Object.values(files).reduce((acc, sectionFiles) => acc + sectionFiles.length, 0)} files selected across {Object.values(files).filter(sectionFiles => sectionFiles.length > 0).length} sections
+                  </p>
+                </div>
+                
+                <button
+                  onClick={handleUploadAll}
+                  disabled={isUploading || isExpired}
+                  className="inline-flex items-center space-x-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-medium py-2 px-4 rounded-lg shadow transition-colors disabled:cursor-not-allowed"
+                >
+                  {isUploading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                      <span className="text-sm">Uploading...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="h-4 w-4" />
+                      <span className="text-sm">Upload All Files</span>
+                    </>
+                  )}
+                </button>
               </div>
               
-              <button
-                onClick={handleUploadAll}
-                disabled={isUploading || isExpired}
-                className="inline-flex items-center space-x-3 bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 hover:from-green-600 hover:via-emerald-600 hover:to-teal-600 disabled:from-slate-400 disabled:to-slate-500 text-white font-bold py-4 px-12 rounded-2xl shadow-2xl transition-all duration-300 transform hover:scale-105 disabled:transform-none disabled:cursor-not-allowed text-lg"
-              >
-                {isUploading ? (
-                  <>
-                    <div className="animate-spin rounded-full h-6 w-6 border-2 border-white border-t-transparent"></div>
-                    <span>Uploading Files...</span>
-                  </>
-                ) : (
-                  <>
-                    <Upload className="h-6 w-6" />
-                    <span>Upload All Files</span>
-                    <Zap className="h-5 w-5" />
-                  </>
-                )}
-              </button>
-              
               {isExpired && (
-                <div className="mt-6 bg-red-50 border border-red-200 rounded-xl p-4">
-                  <p className="text-red-700 font-semibold">
+                <div className="mt-3 bg-red-50 border border-red-200 rounded-lg p-3">
+                  <p className="text-red-700 text-sm font-medium">
                     ⚠️ This upload link has expired and can no longer be used.
                   </p>
                 </div>
@@ -623,23 +618,6 @@ const DocumentUploadPage = () => {
           </div>
         )}
       </div>
-
-      <style jsx>{`
-        .custom-scrollbar::-webkit-scrollbar {
-          width: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-          background: #f1f5f9;
-          border-radius: 3px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: #cbd5e1;
-          border-radius: 3px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: #94a3b8;
-        }
-      `}</style>
     </div>
   );
 };
