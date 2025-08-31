@@ -152,6 +152,8 @@ const AdminStoragePage = () => {
     return Object.values(companyStats).map(company => ({
       ...company,
       sectionCount: company.sections.size,
+
+      
       sections: Array.from(company.sections)
     })).sort((a, b) => a.name.localeCompare(b.name));
   }, [files]);

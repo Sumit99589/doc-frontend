@@ -16,6 +16,7 @@ import {
   Bell,
   User
 } from "lucide-react";
+import Logout from "./logout";
 
 export default function Sidebar() {
   const pathname = usePathname();
@@ -27,7 +28,6 @@ export default function Sidebar() {
     { tab: "dashboard", label: "Dashboard", icon: Home },
     { tab: "clients", label: "Clients", icon: Users },
     { tab: "storage", label: "Storage", icon: Database },
-    { tab: "settings", label: "Settings", icon: Settings },
   ];
 
   const NavItem = ({ tab, label, icon: Icon, badge }: { 
@@ -190,8 +190,10 @@ export default function Sidebar() {
                   <p className="font-medium text-white text-sm">John Doe</p>
                   <p className="text-xs text-slate-400">Administrator</p>
                 </div>
+                
                 <Settings className="w-4 h-4 text-slate-400 group-hover:text-white transition-colors" />
               </div>
+              
             )}
           </div>
         </div>

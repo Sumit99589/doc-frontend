@@ -1,25 +1,35 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useUser } from "@clerk/nextjs";
 import { Search, Filter, Plus, FileText, Edit3, Trash2, Users, Mail, Activity } from "lucide-react";
 
 export default function ClientTable() {
   const [clients, setClients] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const {user} = useUser();
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchClients() {
+      if (!user) { // Add this check
+        setLoading(false); // Ensure loading is set to false if user is not available
+        return; // Exit the function if user is undefined
+      }
+      const userId = user.id; // Remove await
       try {
-        const res = await fetch("http://localhost:3000/getClients");
+        const res = await fetch(`http://localhost:3000/getClients/${userId}`);
         const data: { clients: any[] } = await res.json();
         setClients(data.clients || []);
       } catch (err) {
         console.error("Error fetching clients:", err);
+      } finally {
+        setLoading(false);
       }
     }
     fetchClients();
-  }, []);
+  }, [user]); // Add user to the dependency array
 
   async function deleteClient(id){
     const res = await fetch("http://localhost:3000/deleteClient", {
@@ -34,8 +44,8 @@ export default function ClientTable() {
   }
 
   const filteredClients = clients.filter(client => {
-    const matchesSearch = client.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         client.email?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = client.client_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         client.client_email?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === "all" || client.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
@@ -56,6 +66,16 @@ export default function ClientTable() {
   const totalClients = clients.length;
   const activeClients = clients.filter(c => c.status === 'active').length;
   const pendingClients = clients.filter(c => c.status === 'pending').length;
+
+if (loading) {
+    return (
+      <div className="flex-1 p-8 min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
@@ -191,10 +211,10 @@ export default function ClientTable() {
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold">
-                            {client.name?.charAt(0)?.toUpperCase() || '?'}
+                            {client.clint_name?.charAt(0)?.toUpperCase() || '?'}
                           </div>
                           <div>
-                            <p className="font-semibold text-white">{client.company || 'Unknown'}</p>
+                            <p className="font-semibold text-white">{client.client_name || 'Unknown'}</p>
                             <p className="text-sm text-slate-400">Client ID: #{client.id || 'N/A'}</p>
                           </div>
                         </div>
@@ -203,7 +223,7 @@ export default function ClientTable() {
                         <div className="flex items-center gap-2">
                           <Mail className="w-4 h-4 text-slate-400" />
                           <span className="text-blue-400 hover:text-blue-300 transition-colors">
-                            {client.email || 'No email'}
+                            {client.client_email || 'No email'}
                           </span>
                         </div>
                       </td>

@@ -1,5 +1,3 @@
-"use client";
-
 import { useMemo, useState } from "react";
 import {
   Dialog,
@@ -41,6 +39,8 @@ import {
   Send,
   User
 } from "lucide-react";
+
+import { useUser } from "@clerk/nextjs";
 
 const categoriesData = {
   categories: [
@@ -155,6 +155,7 @@ const categoriesData = {
 };
 
 export default function RequestDocumentsDialog({clientName}) {
+  const {user} = useUser();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [comboOpen, setComboOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -200,7 +201,8 @@ export default function RequestDocumentsDialog({clientName}) {
       clientName: clientName,
       period,
       dueDate,
-      docs: [...selectedDocs, ...customDocs]
+      docs: [...selectedDocs, ...customDocs],
+      userId : user.id
     };
 
     try {

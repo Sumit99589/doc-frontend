@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useUser } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -26,18 +27,28 @@ import {
   Bell,
   Zap,
   Target,
-  Globe
+  Globe,
+  LogOut
 } from "lucide-react";
+import Logout from "./logout";
 
 export default function Dashboard() {
+
+  const {user} = useUser();
+
   const [clients, setClients] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [timeFilter, setTimeFilter] = useState("7d");
 
   useEffect(() => {
     async function fetchClients() {
+      if (!user) { // Add this check
+        setLoading(false); // Ensure loading is set to false if user is not available
+        return; // Exit the function if user is undefined
+      }
+      const userId = user.id; // Remove await
       try {
-        const res = await fetch("http://localhost:3000/getClients");
+        const res = await fetch(`http://localhost:3000/getClients/${userId}`);
         const data: { clients: any[] } = await res.json();
         setClients(data.clients || []);
       } catch (err) {
@@ -47,7 +58,7 @@ export default function Dashboard() {
       }
     }
     fetchClients();
-  }, []);
+  }, [user]); // Add user to the dependency array
 
   // Mock data for dashboard analytics
   const stats = {
@@ -97,7 +108,7 @@ export default function Dashboard() {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">
-              Dashboard Overview
+              Dashboard Overview {user?.fullName}
             </h1>
             <p className="text-slate-400 mt-2">Welcome back! Here's what's happening with your business today.</p>
           </div>
@@ -116,6 +127,7 @@ export default function Dashboard() {
               <Calendar className="w-4 h-4 mr-2" />
               Generate Report
             </Button>
+            <Logout></Logout>
           </div>
         </div>
 
@@ -226,10 +238,10 @@ export default function Dashboard() {
                               <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white text-sm font-semibold">
                                 {client.company?.charAt(0)?.toUpperCase() || '?'}
                               </div>
-                              <span className="font-medium text-white">{client.company || 'Unknown'}</span>
+                              <span className="font-medium text-white">{client.client_name || 'Unknown'}</span>
                             </div>
                           </td>
-                          <td className="px-4 py-3 text-blue-400">{client.email}</td>
+                          <td className="px-4 py-3 text-blue-400">{client.client_email}</td>
                           <td className="px-4 py-3">
                             <span className={cn(
                               "inline-flex items-center px-2 py-1 rounded-full text-xs font-medium",
@@ -241,7 +253,7 @@ export default function Dashboard() {
                             </span>
                           </td>
                           <td className="px-4 py-3 text-center">
-                            <RequestDocumentsDialog clientName={client.company} />
+                            <RequestDocumentsDialog clientName={client.client_name} />
                           </td>
                         </tr>
                       ))}

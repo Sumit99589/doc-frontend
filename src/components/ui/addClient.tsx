@@ -22,6 +22,7 @@ import {
   Loader2,
   X
 } from "lucide-react";
+import { useUser } from "@clerk/nextjs";
 
 interface FormData {
   company: string;
@@ -47,6 +48,7 @@ interface AddClientProps {
 }
 
 export default function AddClient({ onClose, isOpen }: AddClientProps) {
+  const {user} = useUser()
   const [formData, setFormData] = useState<FormData>({
     company: "",
     email: "",
@@ -126,7 +128,8 @@ export default function AddClient({ onClose, isOpen }: AddClientProps) {
           contactPerson: formData.contactPerson,
           phone: formData.phone,
           address: formData.address,
-          status: formData.status
+          status: formData.status,
+          userId : user.id
         }),
       });
 
@@ -182,7 +185,7 @@ export default function AddClient({ onClose, isOpen }: AddClientProps) {
         </DialogTrigger>
       )}
 
-      <DialogContent className="max-w-2xl bg-white border-0 shadow-2xl rounded-2xl">
+      <DialogContent className="max-w-2xl bg-white border-0 shadow-2xl rounded-2xl text-black">
         <div className="absolute inset-0 bg-gradient-to-br from-slate-50 to-emerald-50/30 rounded-2xl"></div>
         
         <div className="relative z-10">
