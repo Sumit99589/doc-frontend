@@ -25,6 +25,8 @@ export default function RootLayout({
   
   // Check if current path is an upload page
   const isUploadPage = pathname.startsWith('/upload');
+  const isSignInPage = pathname.startsWith('/sign-in');
+  const isSignUpPage = pathname.startsWith('/sign-up');
   const isLandingPage = pathname === "/";
   return (
     <ClerkProvider>
@@ -34,7 +36,7 @@ export default function RootLayout({
           isUploadPage ? 'text-gray-900 bg-white' : 'text-white bg-[#111518]'
         }`}
       >
-        {isUploadPage || isLandingPage? (
+        {isUploadPage || isLandingPage || isSignInPage || isSignUpPage? (
           // Clean layout for upload pages - no sidebar, no navigation
           <main className="min-h-screen">
             {children}

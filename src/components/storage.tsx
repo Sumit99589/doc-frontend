@@ -15,9 +15,9 @@ const BUCKET_NAME = 'client-documents';
 
 const AdminStoragePage = () => {
   // --- Navigation State ---
-  const [currentView, setCurrentView] = useState('companies'); // 'companies', 'sections', 'files'
+  const [currentView, setCurrentView] = useState('companies'); // 'companies', 'subfolders', 'files'
   const [selectedCompany, setSelectedCompany] = useState(null);
-  const [selectedSection, setSelectedSection] = useState(null);
+  const [selectedSubfolder, setSelectedSubfolder] = useState(null);
   const [breadcrumb, setBreadcrumb] = useState([{ name: 'Companies', view: 'companies' }]);
 
   // --- All State Management ---
@@ -33,8 +33,8 @@ const AdminStoragePage = () => {
   const [renameFile, setRenameFile] = useState(null);
 
   // --- State and Ref for Upload Modal ---
-  const [uploadClient, setUploadClient] = useState('');
-  const [uploadSection, setUploadSection] = useState('');
+  const [uploadCompany, setUploadCompany] = useState('');
+  const [uploadSubfolder, setUploadSubfolder] = useState('');
   const [filesToUpload, setFilesToUpload] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState(null);
@@ -50,17 +50,29 @@ const AdminStoragePage = () => {
       const supabaseFiles = await fetchAllFiles(BUCKET_NAME);
       const formattedFiles = supabaseFiles.map(file => {
         const pathParts = file.path.split('/');
-        const clientName = pathParts.length > 2 ? pathParts[0] : 'General';
-        const section = pathParts.length > 2 ? pathParts[1] : 'Uncategorized';
+        // Skip userId (pathParts[0]) and start from companies
+        // Expected structure: userId/companies/subfolder/filename
+        const userId = pathParts[0];
+        const company = pathParts.length > 2 ? pathParts[1] : 'General';
+        const subfolder = pathParts.length > 3 ? pathParts[2] : 'Uncategorized';
         const fileName = pathParts[pathParts.length - 1];
+        
         const { data: { publicUrl } } = supabase.storage
           .from(BUCKET_NAME)
           .getPublicUrl(file.path);
 
         return {
-          id: file.id, name: fileName, clientName: clientName, section: section,
-          size: file.metadata.size, type: file.metadata.mimetype, uploadedAt: file.created_at,
-          uploadedBy: 'N/A', path: file.path, url: publicUrl,
+          id: file.id, 
+          name: fileName, 
+          company: company, 
+          subfolder: subfolder,
+          size: file.metadata.size, 
+          type: file.metadata.mimetype, 
+          uploadedAt: file.created_at,
+          uploadedBy: 'N/A', 
+          path: file.path, 
+          url: publicUrl,
+          userId: userId
         };
       });
       setFiles(formattedFiles);
@@ -72,41 +84,41 @@ const AdminStoragePage = () => {
   };
 
   // --- Navigation Functions ---
-  const navigateToSections = (companyName) => {
+  const navigateToSubfolders = (companyName) => {
     setSelectedCompany(companyName);
-    setSelectedSection(null);
-    setCurrentView('sections');
+    setSelectedSubfolder(null);
+    setCurrentView('subfolders');
     setBreadcrumb([
       { name: 'Companies', view: 'companies' },
-      { name: companyName, view: 'sections' }
+      { name: companyName, view: 'subfolders' }
     ]);
     setSelectedFiles(new Set());
   };
 
-  const navigateToFiles = (sectionName) => {
-    setSelectedSection(sectionName);
+  const navigateToFiles = (subfolderName) => {
+    setSelectedSubfolder(subfolderName);
     setCurrentView('files');
     setBreadcrumb([
       { name: 'Companies', view: 'companies' },
-      { name: selectedCompany, view: 'sections' },
-      { name: sectionName.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()), view: 'files' }
+      { name: selectedCompany, view: 'subfolders' },
+      { name: subfolderName.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()), view: 'files' }
     ]);
     setSelectedFiles(new Set());
   };
 
-  const navigateTo = (targetView, company = null, section = null) => {
+  const navigateTo = (targetView, company = null, subfolder = null) => {
     if (targetView === 'companies') {
       setCurrentView('companies');
       setSelectedCompany(null);
-      setSelectedSection(null);
+      setSelectedSubfolder(null);
       setBreadcrumb([{ name: 'Companies', view: 'companies' }]);
-    } else if (targetView === 'sections' && company) {
+    } else if (targetView === 'subfolders' && company) {
       setSelectedCompany(company);
-      setSelectedSection(null);
-      setCurrentView('sections');
+      setSelectedSubfolder(null);
+      setCurrentView('subfolders');
       setBreadcrumb([
         { name: 'Companies', view: 'companies' },
-        { name: company, view: 'sections' }
+        { name: company, view: 'subfolders' }
       ]);
     }
     setSelectedFiles(new Set());
@@ -115,7 +127,7 @@ const AdminStoragePage = () => {
   // --- Memoized Calculations ---
   const storageStats = useMemo(() => {
     if (files.length === 0) {
-      return { totalFiles: 0, totalSize: 0, recentUploads: 0, activeClients: 0 };
+      return { totalFiles: 0, totalSize: 0, recentUploads: 0, activeCompanies: 0 };
     }
     return {
       totalFiles: files.length,
@@ -123,72 +135,70 @@ const AdminStoragePage = () => {
       recentUploads: files.filter(f =>
         new Date(f.uploadedAt) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
       ).length,
-      activeClients: [...new Set(files.map(f => f.clientName))].length
+      activeCompanies: [...new Set(files.map(f => f.company))].length
     };
   }, [files]);
 
   const companies = useMemo(() => {
     const companyStats = {};
     files.forEach(file => {
-      if (!companyStats[file.clientName]) {
-        companyStats[file.clientName] = {
-          name: file.clientName,
+      if (!companyStats[file.company]) {
+        companyStats[file.company] = {
+          name: file.company,
           fileCount: 0,
           totalSize: 0,
-          sections: new Set(),
+          subfolders: new Set(),
           lastUpload: null
         };
       }
-      companyStats[file.clientName].fileCount++;
-      companyStats[file.clientName].totalSize += file.size;
-      companyStats[file.clientName].sections.add(file.section);
+      companyStats[file.company].fileCount++;
+      companyStats[file.company].totalSize += file.size;
+      companyStats[file.company].subfolders.add(file.subfolder);
       
       const uploadDate = new Date(file.uploadedAt);
-      if (!companyStats[file.clientName].lastUpload || uploadDate > new Date(companyStats[file.clientName].lastUpload)) {
-        companyStats[file.clientName].lastUpload = file.uploadedAt;
+      if (!companyStats[file.company].lastUpload || uploadDate > new Date(companyStats[file.company].lastUpload)) {
+        companyStats[file.company].lastUpload = file.uploadedAt;
       }
     });
 
     return Object.values(companyStats).map(company => ({
       ...company,
-      sectionCount: company.sections.size,
-
-      
-      sections: Array.from(company.sections)
+      subfolderCount: company.subfolders.size,
+      subfolders: Array.from(company.subfolders)
     })).sort((a, b) => a.name.localeCompare(b.name));
   }, [files]);
 
-  const sections = useMemo(() => {
+  const subfolders = useMemo(() => {
     if (!selectedCompany) return [];
     
-    const sectionStats = {};
-    files.filter(file => file.clientName === selectedCompany).forEach(file => {
-      if (!sectionStats[file.section]) {
-        sectionStats[file.section] = {
-          name: file.section,
+    const subfolderStats = {};
+    files.filter(file => file.company === selectedCompany).forEach(file => {
+      if (!subfolderStats[file.subfolder]) {
+        subfolderStats[file.subfolder] = {
+          name: file.subfolder,
           fileCount: 0,
           totalSize: 0,
           lastUpload: null
         };
       }
-      sectionStats[file.section].fileCount++;
-      sectionStats[file.section].totalSize += file.size;
+      subfolderStats[file.subfolder].fileCount++;
+      subfolderStats[file.subfolder].totalSize += file.size;
       
       const uploadDate = new Date(file.uploadedAt);
-      if (!sectionStats[file.section].lastUpload || uploadDate > new Date(sectionStats[file.section].lastUpload)) {
-        sectionStats[file.section].lastUpload = file.uploadedAt;
+      if (!subfolderStats[file.subfolder].lastUpload || uploadDate > new Date(subfolderStats[file.subfolder].lastUpload)) {
+        subfolderStats[file.subfolder].lastUpload = file.uploadedAt;
       }
     });
 
-    return Object.values(sectionStats).sort((a, b) => a.name.localeCompare(b.name));
+    return Object.values(subfolderStats).sort((a, b) => a.name.localeCompare(b.name));
   }, [files, selectedCompany]);
 
   const currentFiles = useMemo(() => {
-    if (currentView !== 'files' || !selectedCompany || !selectedSection) return [];
+    if (currentView !== 'files' || !selectedCompany || !selectedSubfolder) return [];
     
     let filtered = files.filter(file => 
-      file.clientName === selectedCompany && 
-      file.section === selectedSection &&
+      file.company === selectedCompany && 
+      file.subfolder === selectedSubfolder &&
       file.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
@@ -203,10 +213,10 @@ const AdminStoragePage = () => {
       return sortOrder === 'asc' ? comparison : -comparison;
     });
     return filtered;
-  }, [files, selectedCompany, selectedSection, searchTerm, sortBy, sortOrder, currentView]);
+  }, [files, selectedCompany, selectedSubfolder, searchTerm, sortBy, sortOrder, currentView]);
 
-  const uniqueClients = useMemo(() => [...new Set(files.map(file => file.clientName).sort())], [files]);
-  const uniqueSections = useMemo(() => [...new Set(files.map(file => file.section).sort())], [files]);
+  const uniqueCompanies = useMemo(() => [...new Set(files.map(file => file.company).sort())], [files]);
+  const uniqueSubfolders = useMemo(() => [...new Set(files.map(file => file.subfolder).sort())], [files]);
 
   // --- Helper & Handler Functions ---
   const handleFileSelect = (fileId) => {
@@ -348,22 +358,26 @@ const AdminStoragePage = () => {
     setShowUploadModal(false);
     setTimeout(() => {
       setFilesToUpload([]);
-      setUploadClient('');
-      setUploadSection('');
+      setUploadCompany('');
+      setUploadSubfolder('');
       setIsUploading(false);
       setUploadError(null);
     }, 300);
   };
 
   const handleUpload = async () => {
-    if (!uploadClient || !uploadSection || filesToUpload.length === 0) {
-      setUploadError("Please select a client, a section, and choose at least one file.");
+    if (!uploadCompany || !uploadSubfolder || filesToUpload.length === 0) {
+      setUploadError("Please select a company, a subfolder, and choose at least one file.");
       return;
     }
     setIsUploading(true);
     setUploadError(null);
+    
+    // Get userId from the first file in the existing files (assuming all belong to the same user)
+    const userId = files.length > 0 ? files[0].userId : 'default-user';
+    
     const uploadPromises = filesToUpload.map(file => {
-      const filePath = `${uploadClient}/${uploadSection}/${file.name}`;
+      const filePath = `${userId}/${uploadCompany}/${uploadSubfolder}/${file.name}`;
       return supabase.storage.from(BUCKET_NAME).upload(filePath, file, { upsert: false });
     });
     try {
@@ -407,7 +421,7 @@ const AdminStoragePage = () => {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">File Storage</h1>
-            <p className="text-slate-400 mt-2">Manage and organize all your client documents</p>
+            <p className="text-slate-400 mt-2">Manage and organize all your company documents</p>
           </div>
           <div className="flex items-center gap-4">
             <Button onClick={() => setShowUploadModal(true)} className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400">
@@ -455,14 +469,14 @@ const AdminStoragePage = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-slate-400 text-sm">Active Clients</p>
-                  <p className="text-2xl font-bold text-white">{storageStats.activeClients}</p>
+                  <p className="text-slate-400 text-sm">Active Companies</p>
+                  <p className="text-2xl font-bold text-white">{storageStats.activeCompanies}</p>
                   <div className="flex items-center gap-1 mt-1">
-                    <Users className="w-4 h-4 text-emerald-400" />
+                    <Building2 className="w-4 h-4 text-emerald-400" />
                     <span className="text-emerald-400 text-sm">with documents</span>
                   </div>
                 </div>
-                <div className="p-3 bg-emerald-500/20 rounded-lg"><Users className="w-6 h-6 text-emerald-400" /></div>
+                <div className="p-3 bg-emerald-500/20 rounded-lg"><Building2 className="w-6 h-6 text-emerald-400" /></div>
               </div>
             </CardContent>
           </Card>
@@ -494,8 +508,8 @@ const AdminStoragePage = () => {
                     onClick={() => {
                       if (item.view === 'companies') {
                         navigateTo('companies');
-                      } else if (item.view === 'sections') {
-                        navigateTo('sections', selectedCompany);
+                      } else if (item.view === 'subfolders') {
+                        navigateTo('subfolders', selectedCompany);
                       }
                     }}
                     className={cn(
@@ -550,7 +564,7 @@ const AdminStoragePage = () => {
                 <div className="flex items-center gap-2">
                   <Button
                     variant="outline"
-                    onClick={() => navigateTo('sections', selectedCompany)}
+                    onClick={() => navigateTo('subfolders', selectedCompany)}
                     className="border-slate-600 text-slate-300 hover:bg-slate-700 hover:text-white"
                   >
                     <ArrowLeft className="h-4 w-4 mr-2" />
@@ -595,7 +609,7 @@ const AdminStoragePage = () => {
                   {companies.map((company) => (
                     <div
                       key={company.name}
-                      onClick={() => navigateToSections(company.name)}
+                      onClick={() => navigateToSubfolders(company.name)}
                       className="bg-slate-700/30 border border-slate-600/50 rounded-xl p-6 hover:bg-slate-700/50 hover:border-slate-500/50 transition-all cursor-pointer group"
                     >
                       <div className="flex items-start justify-between mb-4">
@@ -614,8 +628,8 @@ const AdminStoragePage = () => {
                       </div>
                       <div className="space-y-2 text-sm">
                         <div className="flex justify-between">
-                          <span className="text-slate-400">Sections:</span>
-                          <span className="text-white font-medium">{company.sectionCount}</span>
+                          <span className="text-slate-400">Subfolders:</span>
+                          <span className="text-white font-medium">{company.subfolderCount}</span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-slate-400">Total Size:</span>
@@ -632,12 +646,12 @@ const AdminStoragePage = () => {
               </div>
             )}
 
-            {/* Sections View */}
-            {currentView === 'sections' && (
+            {/* Subfolders View */}
+            {currentView === 'subfolders' && (
               <div className="p-6">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-xl font-semibold text-white">
-                    Sections in {selectedCompany}
+                    Subfolders in {selectedCompany}
                   </h2>
                   <Button
                     variant="outline"
@@ -649,10 +663,10 @@ const AdminStoragePage = () => {
                   </Button>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {sections.map((section) => (
+                  {subfolders.map((subfolder) => (
                     <div
-                      key={section.name}
-                      onClick={() => navigateToFiles(section.name)}
+                      key={subfolder.name}
+                      onClick={() => navigateToFiles(subfolder.name)}
                       className="bg-slate-700/30 border border-slate-600/50 rounded-xl p-6 hover:bg-slate-700/50 hover:border-slate-500/50 transition-all cursor-pointer group"
                     >
                       <div className="flex items-start justify-between mb-4">
@@ -662,9 +676,9 @@ const AdminStoragePage = () => {
                           </div>
                           <div>
                             <h3 className="text-lg font-semibold text-white group-hover:text-emerald-400 transition-colors">
-                              {section.name.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                              {subfolder.name.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
                             </h3>
-                            <p className="text-sm text-slate-400">{section.fileCount} files</p>
+                            <p className="text-sm text-slate-400">{subfolder.fileCount} files</p>
                           </div>
                         </div>
                         <ChevronRight className="h-5 w-5 text-slate-400 group-hover:text-emerald-400 transition-colors" />
@@ -672,15 +686,15 @@ const AdminStoragePage = () => {
                       <div className="space-y-2 text-sm">
                         <div className="flex justify-between">
                           <span className="text-slate-400">Files:</span>
-                          <span className="text-white font-medium">{section.fileCount}</span>
+                          <span className="text-white font-medium">{subfolder.fileCount}</span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-slate-400">Total Size:</span>
-                          <span className="text-white font-medium">{formatFileSize(section.totalSize)}</span>
+                          <span className="text-white font-medium">{formatFileSize(subfolder.totalSize)}</span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-slate-400">Last Upload:</span>
-                          <span className="text-white font-medium">{formatDate(section.lastUpload)}</span>
+                          <span className="text-white font-medium">{formatDate(subfolder.lastUpload)}</span>
                         </div>
                       </div>
                     </div>
@@ -871,25 +885,25 @@ const AdminStoragePage = () => {
             <div className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-slate-300">Client</label>
+                  <label className="text-sm font-medium text-slate-300">Company</label>
                   <select
-                    value={uploadClient}
-                    onChange={(e) => setUploadClient(e.target.value)}
+                    value={uploadCompany}
+                    onChange={(e) => setUploadCompany(e.target.value)}
                     className="w-full px-4 py-2 bg-slate-700/50 border border-slate-600 rounded-lg text-white"
                   >
-                    <option value="" disabled>Select a client...</option>
-                    {uniqueClients.map(c => <option key={c} value={c}>{c}</option>)}
+                    <option value="" disabled>Select a company...</option>
+                    {uniqueCompanies.map(c => <option key={c} value={c}>{c}</option>)}
                   </select>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-slate-300">Document Section</label>
+                  <label className="text-sm font-medium text-slate-300">Subfolder</label>
                   <select
-                    value={uploadSection}
-                    onChange={(e) => setUploadSection(e.target.value)}
+                    value={uploadSubfolder}
+                    onChange={(e) => setUploadSubfolder(e.target.value)}
                     className="w-full px-4 py-2 bg-slate-700/50 border border-slate-600 rounded-lg text-white"
                   >
-                    <option value="" disabled>Select a section...</option>
-                    {uniqueSections.map(s => (
+                    <option value="" disabled>Select a subfolder...</option>
+                    {uniqueSubfolders.map(s => (
                       <option key={s} value={s}>
                         {s.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
                       </option>
@@ -986,12 +1000,12 @@ const AdminStoragePage = () => {
                 <h3 className="text-lg font-bold text-white">File Details</h3>
                 <div className="space-y-3">
                   <div className="flex justify-between">
-                    <span className="text-slate-400">Client:</span>
-                    <span className="text-white font-medium">{previewFile.clientName}</span>
+                    <span className="text-slate-400">Company:</span>
+                    <span className="text-white font-medium">{previewFile.company}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-400">Section:</span>
-                    <span className="text-white font-medium capitalize">{previewFile.section.replace('_', ' ')}</span>
+                    <span className="text-slate-400">Subfolder:</span>
+                    <span className="text-white font-medium capitalize">{previewFile.subfolder.replace('_', ' ')}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-400">File Size:</span>
