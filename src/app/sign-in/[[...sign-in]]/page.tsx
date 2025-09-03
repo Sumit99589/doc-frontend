@@ -82,7 +82,7 @@ export default function SignInPage() {
           <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent mb-2">
             Welcome back
           </h1>
-          <p className="text-slate-400">Sign in to your ClientFlow account</p>
+          <p className="text-slate-400">Sign in to your FlashDoc account</p>
         </div>
 
         <Card className="bg-slate-800/30 backdrop-blur-sm border-slate-700/50">

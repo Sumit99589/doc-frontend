@@ -17,8 +17,10 @@ import {
   User
 } from "lucide-react";
 import Logout from "./logout";
+import { useUser } from "@clerk/nextjs";
 
 export default function Sidebar() {
+  const {user} = useUser()
   const pathname = usePathname();
   const [activeTab, setActiveTab] = useState("dashboard");
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -76,12 +78,14 @@ export default function Sidebar() {
           <div className="flex items-center justify-between mb-8">
             {!isCollapsed && (
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl shadow-lg">
-                  <Building2 className="w-6 h-6 text-white" />
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl mb-4">
+                <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
+                  <div className="w-4 h-4 bg-gradient-to-r from-blue-600 to-purple-600 rounded"></div>
+                </div>
                 </div>
                 <div>
                   <h1 className="text-xl font-bold bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">
-                    Acme Co
+                    FlashDoc
                   </h1>
                   <p className="text-xs text-slate-400">Professional Dashboard</p>
                 </div>
@@ -187,7 +191,7 @@ export default function Sidebar() {
                   <User className="w-5 h-5 text-white" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-white text-sm">John Doe</p>
+                  <p className="font-medium text-white text-sm">{user?.fullName}</p>
                   <p className="text-xs text-slate-400">Administrator</p>
                 </div>
                 

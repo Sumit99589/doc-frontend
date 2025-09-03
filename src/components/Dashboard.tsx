@@ -1,5 +1,6 @@
 "use client";
 
+import ClientsDialog from './ClientsDialog'; // Adjust the path as needed
 import { useEffect, useState } from "react";
 import { useUser } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
@@ -39,6 +40,8 @@ export default function Dashboard() {
   const [clients, setClients] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [timeFilter, setTimeFilter] = useState("7d");
+  const [showClientsDialog, setShowClientsDialog] = useState(false);
+
 
   useEffect(() => {
     async function fetchClients() {
@@ -214,10 +217,15 @@ export default function Dashboard() {
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-lg font-semibold text-white">Recent Clients</h3>
-                  <Button variant="outline" size="sm" className="border-slate-700 text-slate-400 hover:text-white">
-                    View All
-                    <ArrowUpRight className="w-4 h-4 ml-1" />
-                  </Button>
+                  <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="border-slate-700  hover:text-slate-400 hover:border-slate-600"
+                        onClick={() => setShowClientsDialog(true)}>
+                          View All
+                        <ArrowUpRight className="w-4 h-4 ml-1" />
+                    </Button>
+                
                 </div>
                 
                 <div className="overflow-hidden rounded-lg border border-slate-700/50">
@@ -316,6 +324,11 @@ export default function Dashboard() {
           </CardContent>
         </Card>
       </div>
+      <ClientsDialog 
+                    clients={clients}
+                    isOpen={showClientsDialog}
+                    onClose={() => setShowClientsDialog(false)}
+                />
     </div>
   );
 }
