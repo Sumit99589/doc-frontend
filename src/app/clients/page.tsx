@@ -4,23 +4,34 @@ import { useState, useEffect } from "react";
 import { useUser } from "@clerk/nextjs";
 import { Search, Filter, Plus, FileText, Edit3, Trash2, Users, Mail, Activity } from "lucide-react";
 
+interface Client {
+  id: string;
+  client_name: string;
+  client_email: string;
+  status: 'active' | 'pending' | 'inactive';
+}
+
 export default function ClientTable() {
-  const [clients, setClients] = useState<any[]>([]);
+  const [clients, setClients] = useState<Client[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const {user} = useUser();
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [editingClient, setEditingClient] = useState<Client | null>(null);
+  const [viewingClient, setViewingClient] = useState<Client | null>(null);
+  const { user } = useUser();
   const [loading, setLoading] = useState(true);
+  const [deleting, setDeleting] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchClients() {
-      if (!user) { // Add this check
-        setLoading(false); // Ensure loading is set to false if user is not available
-        return; // Exit the function if user is undefined
+      if (!user) {
+        setLoading(false);
+        return;
       }
-      const userId = user.id; // Remove await
+      const userId = user.id;
       try {
         const res = await fetch(`http://localhost:3000/getClients/${userId}`);
-        const data: { clients: any[] } = await res.json();
+        const data: { clients: Client[] } = await res.json();
         setClients(data.clients || []);
       } catch (err) {
         console.error("Error fetching clients:", err);
@@ -29,18 +40,101 @@ export default function ClientTable() {
       }
     }
     fetchClients();
-  }, [user]); // Add user to the dependency array
+  }, [user]);
 
-  async function deleteClient(id){
-    const res = await fetch("http://localhost:3000/deleteClient", {
+  // Fixed delete function with proper error handling and state update
+  async function deleteClient(id: string) {
+    if (!confirm("Are you sure you want to delete this client?")) {
+      return;
+    }
+
+    setDeleting(id);
+    try {
+      const res = await fetch("http://localhost:3000/deleteClient", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id }),
+      });
+
+      if (res.ok) {
+        // Update local state to remove the deleted client
+        setClients(prevClients => prevClients.filter(client => client.id !== id));
+        alert("Client deleted successfully!");
+      } else {
+        const errorData = await res.json();
+        alert(`Failed to delete client: ${errorData.message || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error("Error deleting client:", error);
+      alert("An error occurred while deleting the client");
+    } finally {
+      setDeleting(null);
+    }
+  }
+
+  // Add client function
+  async function addClient(clientData: Omit<Client, 'id'>) {
+    if (!user) return;
+
+    try {
+      console.log("sending req")
+      const res = await fetch("http://localhost:3000/add-client", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ 
-          id : id
+          ...clientData,
+          userId: user.id 
         }),
       });
+      console.log("request sent")
+      console.log(clientData)
+
+      if (res.ok) {
+        const newClient = await res.json();
+        setClients(prevClients => [...prevClients, newClient.client]);
+        setShowAddForm(false);
+        alert("Client added successfully!");
+      } else {
+        const errorData = await res.json();
+        alert(`Failed to add client: ${errorData.message || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error("Error adding client:", error);
+      alert("An error occurred while adding the client");
+    }
+  }
+
+  // Update client function
+  async function updateClient(clientData: Client) {
+    try {
+      const res = await fetch("http://localhost:3000/updateClient", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(clientData),
+      });
+
+      if (res.ok) {
+        setClients(prevClients => 
+          prevClients.map(client => 
+            client.id === clientData.id ? clientData : client
+          )
+        );
+        setEditingClient(null);
+        alert("Client updated successfully!");
+      } else {
+        const errorData = await res.json();
+        alert(`Failed to update client: ${errorData.message || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error("Error updating client:", error);
+      alert("An error occurred while updating the client");
+    }
   }
 
   const filteredClients = clients.filter(client => {
@@ -67,7 +161,130 @@ export default function ClientTable() {
   const activeClients = clients.filter(c => c.status === 'active').length;
   const pendingClients = clients.filter(c => c.status === 'pending').length;
 
-if (loading) {
+  // Client Form Component
+  const ClientForm = ({ client, onSubmit, onCancel }: {
+    client?: Client | null;
+    onSubmit: (data: any) => void;
+    onCancel: () => void;
+  }) => {
+    const [formData, setFormData] = useState({
+      client_name: client?.client_name || '',
+      client_email: client?.client_email || '',
+      status: client?.status || 'pending'
+    });
+
+    const handleSubmit = (e: React.FormEvent) => {
+      e.preventDefault();
+      if (client) {
+        onSubmit({ ...client, ...formData });
+      } else {
+        onSubmit(formData);
+      }
+    };
+
+    return (
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div className="bg-slate-800 border border-slate-700 rounded-xl p-6 w-full max-w-md mx-4">
+          <h3 className="text-xl font-semibold text-white mb-4">
+            {client ? 'Edit Client' : 'Add New Client'}
+          </h3>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">
+                Client Name
+              </label>
+              <input
+                type="text"
+                value={formData.client_name}
+                onChange={(e) => setFormData(prev => ({ ...prev, client_name: e.target.value }))}
+                className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">
+                Email
+              </label>
+              <input
+                type="email"
+                value={formData.client_email}
+                onChange={(e) => setFormData(prev => ({ ...prev, client_email: e.target.value }))}
+                className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">
+                Status
+              </label>
+              <select
+                value={formData.status}
+                onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.value as any }))}
+                className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="pending">Pending</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
+            </div>
+            <div className="flex gap-3 pt-4">
+              <button
+                type="submit"
+                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition-colors"
+              >
+                {client ? 'Update' : 'Add'} Client
+              </button>
+              <button
+                type="button"
+                onClick={onCancel}
+                className="flex-1 bg-slate-600 hover:bg-slate-700 text-white py-2 px-4 rounded-lg transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    );
+  };
+
+  // Client Details Modal
+  const ClientDetailsModal = ({ client, onClose }: { client: Client; onClose: () => void }) => (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div className="bg-slate-800 border border-slate-700 rounded-xl p-6 w-full max-w-md mx-4">
+        <h3 className="text-xl font-semibold text-white mb-4">Client Details</h3>
+        <div className="space-y-3">
+          <div>
+            <label className="block text-sm font-medium text-slate-400">Client ID</label>
+            <p className="text-white">#{client.id}</p>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-400">Name</label>
+            <p className="text-white">{client.client_name}</p>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-400">Email</label>
+            <p className="text-white">{client.client_email}</p>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-400">Status</label>
+            <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border mt-1 ${getStatusColor(client.status)}`}>
+              <div className={`w-1.5 h-1.5 rounded-full mr-2 ${client.status === 'active' ? 'bg-emerald-400' : client.status === 'pending' ? 'bg-amber-400' : 'bg-slate-400'}`}></div>
+              {client.status}
+            </span>
+          </div>
+        </div>
+        <button
+          onClick={onClose}
+          className="w-full mt-6 bg-slate-600 hover:bg-slate-700 text-white py-2 px-4 rounded-lg transition-colors"
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  );
+
+  if (loading) {
     return (
       <div className="flex-1 p-8 min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
         <div className="flex items-center justify-center h-64">
@@ -166,11 +383,14 @@ if (loading) {
             </div>
           </div>
 
-          {/* Add Client Button */}
-          <button className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white rounded-xl font-medium transition-all duration-200 flex items-center gap-2 shadow-lg hover:shadow-blue-500/25 hover:scale-105">
+          {/* Add Client Button - NOW WORKING */}
+          {/* <button 
+            onClick={() => setShowAddForm(true)}
+            className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white rounded-xl font-medium transition-all duration-200 flex items-center gap-2 shadow-lg hover:shadow-blue-500/25 hover:scale-105"
+          >
             <Plus className="w-4 h-4" />
             Add Client
-          </button>
+          </button> */}
         </div>
 
         {/* Table */}
@@ -211,7 +431,7 @@ if (loading) {
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold">
-                            {client.clint_name?.charAt(0)?.toUpperCase() || '?'}
+                            {client.client_name?.charAt(0)?.toUpperCase() || '?'}
                           </div>
                           <div>
                             <p className="font-semibold text-white">{client.client_name || 'Unknown'}</p>
@@ -235,14 +455,36 @@ if (loading) {
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center justify-center gap-2">
-                          <button className="p-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 rounded-lg transition-all duration-200 hover:scale-110 group-hover:shadow-lg">
+                          {/* View Details Button - NOW WORKING */}
+                          <button 
+                            onClick={() => setViewingClient(client)}
+                            className="p-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 rounded-lg transition-all duration-200 hover:scale-110 group-hover:shadow-lg"
+                            title="View Details"
+                          >
                             <FileText className="w-4 h-4" />
                           </button>
-                          <button className="p-2 bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 rounded-lg transition-all duration-200 hover:scale-110 group-hover:shadow-lg">
+                          
+                          {/* Edit Button - NOW WORKING */}
+                          <button 
+                            onClick={() => setEditingClient(client)}
+                            className="p-2 bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 rounded-lg transition-all duration-200 hover:scale-110 group-hover:shadow-lg"
+                            title="Edit Client"
+                          >
                             <Edit3 className="w-4 h-4" />
                           </button>
-                          <button className="p-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg transition-all duration-200 hover:scale-110 group-hover:shadow-lg" >
-                            <Trash2 className="w-4 h-4" />
+                          
+                          {/* Delete Button - NOW WORKING */}
+                          <button 
+                            onClick={() => deleteClient(client.id)}
+                            disabled={deleting === client.id}
+                            className="p-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg transition-all duration-200 hover:scale-110 group-hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                            title="Delete Client"
+                          >
+                            {deleting === client.id ? (
+                              <div className="w-4 h-4 animate-spin rounded-full border-2 border-red-400 border-t-transparent" />
+                            ) : (
+                              <Trash2 className="w-4 h-4" />
+                            )}
                           </button>
                         </div>
                       </td>
@@ -262,6 +504,29 @@ if (loading) {
           </div>
         )}
       </div>
+
+      {/* Modals */}
+      {showAddForm && (
+        <ClientForm
+          onSubmit={addClient}
+          onCancel={() => setShowAddForm(false)}
+        />
+      )}
+
+      {editingClient && (
+        <ClientForm
+          client={editingClient}
+          onSubmit={updateClient}
+          onCancel={() => setEditingClient(null)}
+        />
+      )}
+
+      {viewingClient && (
+        <ClientDetailsModal
+          client={viewingClient}
+          onClose={() => setViewingClient(null)}
+        />
+      )}
     </div>
   );
 }
