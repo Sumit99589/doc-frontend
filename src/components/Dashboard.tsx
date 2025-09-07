@@ -68,12 +68,12 @@ export default function Dashboard() {
     totalClients: clients.length,
     activeClients: clients.filter(c => c.status === 'active').length,
     pendingDocuments: clients.filter(c => c.status === 'pending').length,
-    completedDeals: 24,
-    revenue: 156200,
-    revenueGrowth: 12.5,
-    clientGrowth: 8.2,
-    documentRequests: 48,
-    avgResponseTime: "2.4h"
+    completedDeals: 0,
+    revenue: 0,
+    revenueGrowth: 0,
+    clientGrowth: 0,
+    documentRequests: 0,
+    avgResponseTime: "0"
   };
 
   const recentActivity = [
@@ -244,7 +244,7 @@ export default function Dashboard() {
                           <td className="px-4 py-3">
                             <div className="flex items-center gap-3">
                               <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white text-sm font-semibold">
-                                {client.company?.charAt(0)?.toUpperCase() || '?'}
+                                {client.client_name?.charAt(0)?.toUpperCase() || '?'}
                               </div>
                               <span className="font-medium text-white">{client.client_name || 'Unknown'}</span>
                             </div>

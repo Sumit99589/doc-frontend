@@ -96,14 +96,14 @@ export default function LandingPage() {
     {
       name: "Sarah Martinez",
       role: "Partner, Martinez & Associates CPA",
-      content: "DocFlow transformed our practice. We went from spending entire days chasing documents to having everything organized automatically. Our clients love how easy it is to submit their files.",
+      content: "FlashDoc transformed our practice. We went from spending entire days chasing documents to having everything organized automatically. Our clients love how easy it is to submit their files.",
       initials: "SM",
       gradient: "from-blue-500 to-purple-500"
     },
     {
       name: "Michael Johnson",
       role: "Managing Partner, Johnson Tax Group",
-      content: "The time savings are incredible. What used to take us weeks of back-and-forth emails now happens automatically. DocFlow pays for itself within the first month.",
+      content: "The time savings are incredible. What used to take us weeks of back-and-forth emails now happens automatically. FlashDoc pays for itself within the first month.",
       initials: "MJ",
       gradient: "from-emerald-500 to-blue-500"
     },
@@ -186,7 +186,7 @@ export default function LandingPage() {
                 <FileText className="w-5 h-5 text-white" />
               </div>
               <span className="text-xl font-bold bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">
-                DocFlow
+                FlashDoc
               </span>
             </div>
 
@@ -533,7 +533,7 @@ export default function LandingPage() {
             Ready to Transform Your Practice?
           </h2>
           <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
-            Join thousands of accounting professionals who have already streamlined their document workflow with DocFlow.
+            Join thousands of accounting professionals who have already streamlined their document workflow with FlashDoc.
           </p>
           
           <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-12">
@@ -570,7 +570,7 @@ export default function LandingPage() {
                   <FileText className="w-5 h-5 text-white" />
                 </div>
                 <span className="text-xl font-bold bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">
-                  DocFlow
+                  FlashDoc
                 </span>
               </div>
               <p className="text-slate-400 mb-6">
@@ -617,7 +617,7 @@ export default function LandingPage() {
           <div className="border-t border-slate-800 pt-8">
             <div className="flex flex-col md:flex-row justify-between items-center">
               <p className="text-slate-400 text-sm">
-                © 2024 DocFlow. All rights reserved.
+                © 2025 FlashDoc. All rights reserved.
               </p>
               <div className="flex space-x-6 mt-4 md:mt-0">
                 {["Privacy Policy", "Terms of Service", "Cookie Policy"].map((link, index) => (
