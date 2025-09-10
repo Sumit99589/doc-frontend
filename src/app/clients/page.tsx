@@ -164,7 +164,7 @@ export default function ClientTable() {
   // Client Form Component
   const ClientForm = ({ client, onSubmit, onCancel }: {
     client?: Client | null;
-    onSubmit: (data: any) => void;
+    onSubmit: (data: Client | Omit<Client, "id">) => void;
     onCancel: () => void;
   }) => {
     const [formData, setFormData] = useState({
@@ -219,7 +219,9 @@ export default function ClientTable() {
               </label>
               <select
                 value={formData.status}
-                onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.value as any }))}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, status: e.target.value as Client["status"] }))
+                }
                 className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="pending">Pending</option>
