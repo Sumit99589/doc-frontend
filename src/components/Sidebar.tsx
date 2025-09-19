@@ -30,6 +30,7 @@ export default function Sidebar() {
     { tab: "dashboard", label: "Dashboard", icon: Home },
     { tab: "clients", label: "Clients", icon: Users },
     { tab: "storage", label: "Storage", icon: Database },
+    { tab: "send-files", label: "Send Files", icon: Building2 },
   ];
 
   const NavItem = ({ tab, label, icon: Icon, badge }: { 
